@@ -2,6 +2,7 @@
 
 #Script for creating Survermonkey survey based on a json file containing questions and answers.
 
+from wsgiref import headers
 import requests
 import json
 
@@ -29,7 +30,27 @@ def create_survey():
     survey_id = response.json()["id"]
     return survey_id
 
+def create_questions(survey_id):
+    headers = {
+        "Authorization":f"Bearer {ACCESS_TOKEN}",
+        "Content-Type":"application/json",
+    }
+    for page_name, page_data in questions["Survey Name"].items():
+        for question_name, question_data in page_data.items():
+            question_data["type"] = "multiple_choice"
+            data = {
+                "title": question_name,
+                "family": question_data["type"],
+                "subtype": "vertical",
+                "headings": [{"heading": page_name}],
+                "position": 1,
+                "description": question_data["Description"],
+                "answers": [{"text": answer} for answer in question_data["Answers"]],
+            }
+            response = requests.post(f"{API_URL}/surveys/{survey_id}/pages/1/questions", headers=headers, json=data)
+            print(f"Created question: {question_name}")
 
 if __name__ == "__main__":
     survey_id = create_survey()
     print(f"{survey_id}")
+    create_questions(survey_id)
