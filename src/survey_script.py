@@ -50,7 +50,19 @@ def create_questions(survey_id):
             response = requests.post(f"{API_URL}/surveys/{survey_id}/pages/1/questions", headers=headers, json=data)
             print(f"Created question: {question_name}")
 
+def send_invitations(survey_id):
+    headers = {
+        "Authorization":f"Bearer {ACCESS_TOKEN}",
+        "Content-Type": "application/json",
+    }
+    recepient_data = [{"email": email, "first_name": "", "last_name": ""} for email in email_addresses]
+    data = { "recepients":recepient_data, "type":"email"}
+    response = requests.post(f"{API_URL}/surveys/{survey_id}/collectors", headers=headers, json=data)
+    print(f"{response}")
+    print(response.content)
+
 if __name__ == "__main__":
     survey_id = create_survey()
     print(f"{survey_id}")
     create_questions(survey_id)
+    send_invitations(survey_id)
